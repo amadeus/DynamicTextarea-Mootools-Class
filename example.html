@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Dynamic Textarea</title>
+	<meta name="viewport" content="width = device-width, user-scalable=false; initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
+	<style type="text/css" media="screen">
+		body { font-family:Helvetica,Arial,sans-serif; -webkit-text-size-adjust:none; }
+		h1 { font-size:20px; }
+		small { display:block; font-size:14px; }
+		p { font-size:10px; font-weight:bold; }
+		div { margin-bottom:20px;}
+		textarea#customEvents, textarea#customExtra { font-family:Helvetica,Arial,sans-serif; padding:5px; font-size:18px; line-height:1.5em; width:300px; border:2px dashed red; }
+		.default textarea#customEvents { color:#999; }
+		textarea#customExtra { padding-bottom:1.5em; border:2px solid blue; }
+		textarea#customFilled { padding:5px; font-size:14px; line-height:1.3em; width:400px; font-weight:bold; font-family:Helvetica,Arial,sans-serif; }
+	</style>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/mootools/1.2.3/mootools-yui-compressed.js"></script>
+	<script>
+	//MooTools More, <http://mootools.net/more>. Copyright (c) 2006-2009 Aaron Newton <http://clientcide.com/>, Valerio Proietti <http://mad4milk.net> & the MooTools team <http://mootools.net/developers>, MIT Style License.
+	//Have included the Measure class
+	MooTools.More={version:"1.2.4.4",build:"6f6057dc645fdb7547689183b2311063bd653ddf"};Element.implement({measure:function(e){var g=function(h){return !!(!h||h.offsetHeight||h.offsetWidth);
+	};if(g(this)){return e.apply(this);}var d=this.getParent(),f=[],b=[];while(!g(d)&&d!=document.body){b.push(d.expose());d=d.getParent();}var c=this.expose();
+	var a=e.apply(this);c();b.each(function(h){h();});return a;},expose:function(){if(this.getStyle("display")!="none"){return $empty;}var a=this.style.cssText;
+	this.setStyles({display:"block",position:"absolute",visibility:"hidden"});return function(){this.style.cssText=a;}.bind(this);},getDimensions:function(a){a=$merge({computeSize:false},a);
+	var f={};var d=function(g,e){return(e.computeSize)?g.getComputedSize(e):g.getSize();};var b=this.getParent("body");if(b&&this.getStyle("display")=="none"){f=this.measure(function(){return d(this,a);
+	});}else{if(b){try{f=d(this,a);}catch(c){}}else{f={x:0,y:0};}}return $chk(f.x)?$extend(f,{width:f.x,height:f.y}):$extend(f,{x:f.width,y:f.height});},getComputedSize:function(a){a=$merge({styles:["padding","border"],plains:{height:["top","bottom"],width:["left","right"]},mode:"both"},a);
+	var c={width:0,height:0};switch(a.mode){case"vertical":delete c.width;delete a.plains.width;break;case"horizontal":delete c.height;delete a.plains.height;
+	break;}var b=[];$each(a.plains,function(g,f){g.each(function(h){a.styles.each(function(i){b.push((i=="border")?i+"-"+h+"-width":i+"-"+h);});});});var e={};
+	b.each(function(f){e[f]=this.getComputedStyle(f);},this);var d=[];$each(a.plains,function(g,f){var h=f.capitalize();c["total"+h]=c["computed"+h]=0;g.each(function(i){c["computed"+i.capitalize()]=0;
+	b.each(function(k,j){if(k.test(i)){e[k]=e[k].toInt()||0;c["total"+h]=c["total"+h]+e[k];c["computed"+i.capitalize()]=c["computed"+i.capitalize()]+e[k];}if(k.test(i)&&f!=k&&(k.test("border")||k.test("padding"))&&!d.contains(k)){d.push(k);
+	c["computed"+h]=c["computed"+h]-e[k];}});});});["Width","Height"].each(function(g){var f=g.toLowerCase();if(!$chk(c[f])){return;}c[f]=c[f]+this["offset"+g]+c["computed"+g];
+	c["total"+g]=c[f]+c["total"+g];delete c["computed"+g];},this);return $extend(e,c);}});
+	</script>
+	<script src="Source/dynamicTextarea.js" type="text/javascript" charset="utf-8"></script>
+	<script>
+		window.addEvent('domready',function(){
+			new DynamicTextarea('default'); // Default Textarea, takes no options
+			
+			new DynamicTextarea('customEvents',{ // Custom Textarea, takes options object
+				min_rows:2,
+				max_length:200,
+				onLoad:function()
+				{
+					var parent = this.elements.parent;
+					var el = this.elements.input;
+					if(el.value=='I am at least 2 rows high') parent.addClass('default');
+				},
+				onFocus:function()
+				{
+					var el = this.elements.input;
+					if(el.value=='I am at least 2 rows high') el.value = '';
+				},
+				onBlur:function()
+				{
+					var el = this.elements.input;
+					if(el.value=='') el.value = 'I am at least 2 rows high';
+				}
+			});
+			
+			new DynamicTextarea('customExtra');
+			
+			new DynamicTextarea('customFilled');
+		});
+	</script>
+</head>
+<body>
+	<div>
+		<h1>Default TextArea <small>(No styling or custom options)</small></h1>
+		<textarea id="default"></textarea>
+	</div>
+	
+	<div>
+		<h1>Custom TextArea 1 <small>(CSS Styles, custom onBlur and onFocus events, 2 row minimum height, 200 character max length)</small></h1>
+		<textarea id="customEvents">I am at least 2 rows high</textarea>
+	</div>
+	
+	<div>
+		<h1>Custom TextArea 2 <small>(Always appears to have an extra line of space underneath to encourage more content)</small></h1>
+		<textarea id="customExtra"></textarea>
+	</div>
+	
+	<div>
+		<h1>Custom TextArea 3 <small>(Preloaded with lots of content)</small></h1>
+		<textarea id="customFilled">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</textarea>
+	</div>
+	<p>Known Issue: IE does not respect max length, yet</p>
+</body>
+</html>
