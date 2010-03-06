@@ -2,7 +2,7 @@ DynamicTextarea
 ===========
 Purpose: Provides a lightweight plugin for the textarea tag that dynmically resizes based on its content that has no UI glitches or quirks
 
-http://enmassellc.com/misc/dynamicTextarea.html
+[Demo](http://enmassellc.com/misc/dynamicTextarea.html "Demo")
 
 How to use
 ----------
