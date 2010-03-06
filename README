@@ -13,3 +13,6 @@ Notes:
 Wrap the <textarea> in its own div or misc html tag with display:block to ensure integrity of the user experience while the script resizes the textarea
 
 Check example.html for example usage.
+
+KNOWN ISSUES:
+Internet Explorer does not respect the max_length option.
