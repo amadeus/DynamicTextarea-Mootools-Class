@@ -1,14 +1,19 @@
-/**
- * DynamicTextarea
- * @purpose: Provides a lightweight plugin for the <textarea> tag that dynmically resizes based on its content that has no UI glitches or quirks
- *
- * @copyright: Amadeus Demarzi, 2010
- * @license: MIT-style license.
- * @author: Amadeus Demarzi
- * @requirements: MooTools 1.2, OverText (if a default string is applied), Element.Measure from MooTools More
- *
- * @notes: Wrap the <textarea> in its own div or misc html tag with display:block to ensure integrity of the user experience while the script resizes the textarea
- */
+/*
+---
+description: DynamicTextarea
+authors:
+- Amadeus Demarzi (http://enmassellc.com/)
+license: MIT-style
+requires:
+ core/1.2.4:
+  - Class
+  - Function
+  more/1.2.4
+  - Element.Measure
+provides: [DynamicTextarea]
+...
+*/
+
 var DynamicTextarea = new Class({
 	Implements:[Options,Events],
 	options:
