@@ -13,9 +13,8 @@ It is recommended that you surround the textarea with a display:block type conta
 Constructor:
 
 	new DynamicTextarea(el,options);
-
-el: A dom node or id string
-options: an object containing key:value pairs for configuring the class. Check the source for more details on available options
+	//el: A dom node or id string.
+	//options: an object containing key:value pairs for configuring the class. Check the source for more details on available options
 	
 In Context:
 
