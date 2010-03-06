@@ -1,6 +1,6 @@
 name: DynamicTextarea
 author: Amadeus Demarzi
 category: Forms
-tags: [class, textarea, dynamic]
+tags: [class, textarea, dynamic, input]
 docs: http://enmassellc.com/misc/dynamicTextarea.html
-current: 0.9
+demo: http://enmassellc.com/misc/dynamicTextarea.html
