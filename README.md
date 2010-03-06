@@ -10,12 +10,15 @@ DynamicTextarea is a reusable class that can by applied to any textarea tag on a
 
 It is recommended that you surround the textarea with a display:block type container to ensure ux integrity.
 
-Constructor
+Constructor:
+
 	new DynamicTextarea(el,options);
-	//el: A dom node or id string
-	//options: an object containing key:value pairs for configuring the class. Check the source for more details on available options
+
+el: A dom node or id string
+options: an object containing key:value pairs for configuring the class. Check the source for more details on available options
 	
 In Context:
+
 	var input = new DynamicTextarea($('myInput'),{
 		min_rows:2,
 		max_length:1000
