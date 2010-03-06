@@ -1,15 +1,17 @@
 /*
 ---
 description: DynamicTextarea
+
+license: MIT-style
+
 authors:
 - Amadeus Demarzi (http://enmassellc.com/)
-license: MIT-style
+
 requires:
- core/1.2.4:
-  - Class
-  - Function
-  more/1.2.4
+ core/1.2.4: '*'
+ more/1.2.4:
   - Element.Measure
+
 provides: [DynamicTextarea]
 ...
 */
