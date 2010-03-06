@@ -6,16 +6,6 @@ http://enmassellc.com/misc/dynamicTextarea.html
 
 How to use
 ----------
-
-We expect this section for every plugin. It just explains how to use your plugin.
-Never should a plugin rely on a 3rd party link to explain its behavior or functionality. We need this to ensure that if a website is removed or becomes inaccessible, people can still enjoy your plugins' functionality.
-
-It often includes code snippets, which are just indented pieces of text:
-
-	var script = new MyScript()
-	script.doSomething();
-	
-
 DynamicTextarea is a reusable class that can by applied to any textarea tag on a page, with any sort of CSS styling attached to it.
 
 It is recommended that you surround the textarea with a display:block type container to ensure ux integrity.
