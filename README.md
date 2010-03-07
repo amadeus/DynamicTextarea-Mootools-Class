@@ -1,6 +1,6 @@
 DynamicTextarea
 ===========
-Purpose: Provides a lightweight plugin for the textarea tag that dynmically resizes based on its content that has no UI glitches or quirks
+Purpose: Provides a lightweight plugin for the textarea tag that dynamically resizes based on its content that has no UI glitches or quirks
 
 [Demo](http://enmassellc.com/misc/dynamicTextarea.html "Demo")
 ![Screenshot 1](http://dl.dropbox.com/u/18782/dynamicTextarea.jpg)
@@ -9,7 +9,7 @@ How to use
 ----------
 DynamicTextarea is a reusable class that can by applied to any textarea tag on a page, with any sort of CSS styling attached to it.
 
-It is recommended that you surround the textarea with a display:block type container to ensure ux integrity.
+It is recommended that you surround the textarea with a display:block type container to ensure UI integrity.
 
 Constructor:
 
@@ -28,5 +28,4 @@ This will ensure the textarea is always at least 2 rows tall, and only allows fo
 
 Known Issues
 -----------------
-
 Internet Explorer does not respect the max_length option, yet.
