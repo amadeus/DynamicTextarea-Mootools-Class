@@ -17,70 +17,77 @@ provides: [DynamicTextarea]
 */
 
 var DynamicTextarea = new Class({
+	
 	Implements:[Options,Events],
+	
 	options:
 	{
 		value:'',
-		min_rows:1,
+		minRows:1,
 		string:'',
-		no_breaks:false,
+		noBreaks:false,
 		value:null,
 		basic:'default',
 		focused:'focused',
 		filled:'filled',
+		disabled:'disabled',
 		timeout:'ready',
-		max_length:null,
-		line_height:null,
+		maxLength:null,
+		lineHeight:null,
 		offset:0,
 		ctaClass:''
+		// Available Events
 		//onShow:$empty,
 		//onBlur:$empty,
 		//onKeyPress:$empty,
-		//onLoad:$empty
+		//onLoad:$empty,
+		//onDisable:$empty,
+		//onReset:$empty
 	},
+	
 	elements:
 	{
 		input:null,
 		parent:null,
 		cta:null
 	},
+	
 	initialize:function(el,options)
 	{
 		this.setOptions(options);
-		var opts = this.options, els = this.elements;
 		
-		els.input = document.id(el);
-		if(!els.input) return;
+		this.elements.input = document.id(el);
+		if(!this.elements.input) return;
 		
 		if(window.Browser.Engine.gecko) // Firefox handles scroll heights differently than all other browsers
 		{
-			opts.offset = parseInt(els.input.getStyle('padding-top'),10)+parseInt(els.input.getStyle('padding-bottom'),10)+parseInt(els.input.getStyle('border-bottom-width'),10)+parseInt(els.input.getStyle('border-top-width'),10);
-			opts.padding = 0;
+			this.options.offset = parseInt(this.elements.input.getStyle('padding-top'),10)+parseInt(this.elements.input.getStyle('padding-bottom'),10)+parseInt(this.elements.input.getStyle('border-bottom-width'),10)+parseInt(this.elements.input.getStyle('border-top-width'),10);
+			this.options.padding = 0;
 		}
 		else
 		{
-			opts.offset = parseInt(els.input.getStyle('border-bottom-width'),10)+parseInt(els.input.getStyle('border-top-width'),10);
-			opts.padding = parseInt(els.input.getStyle('padding-top'),10)+parseInt(els.input.getStyle('padding-bottom'),10);
+			this.options.offset = parseInt(this.elements.input.getStyle('border-bottom-width'),10)+parseInt(this.elements.input.getStyle('border-top-width'),10);
+			this.options.padding = parseInt(this.elements.input.getStyle('padding-top'),10)+parseInt(this.elements.input.getStyle('padding-bottom'),10);
 		}
 		
-		els.parent = els.input.getParent();
-		if(opts.string!='' && window.OverText)
+		this.elements.parent = this.elements.input.getParent();
+		if(this.options.string!='' && window.OverText)
 		{
-			els.cta = new OverText(els.input,{
-				textOverride:opts.string,
-				labelClass:opts.ctaClass
+			this.elements.cta = new OverText(this.elements.input,{
+				textOverride:this.options.string,
+				labelClass:this.options.ctaClass
 			});
 		}
 		
 		var backupString = '';
-		if(els.input.value=='') els.parent.addClass(opts.basic);
+		if(this.elements.input.value=='') this.elements.parent.addClass(this.options.basic);
 		else
 		{
-			backupString = els.input.value;
-			els.parent.addClass(opts.filled);
+			backupString = this.elements.input.value;
+			this.elements.parent.addClass(this.options.filled);
 		}
 		
-		els.input.set({
+		this.elements.input.set({
 			'spellcheck':false,
 			'rows':1,
 			'styles':
@@ -93,10 +100,10 @@ var DynamicTextarea = new Class({
 			}
 		});
 		
-		els.input.value = 'M';
-		opts.line_height = (els.input.measure(function(){ return this.getScrollSize().y; }))-opts.padding;
-		els.input.value = backupString;
-		els.input.setStyle('height',opts.line_height*opts.min_rows);
+		this.elements.input.value = 'M';
+		this.options.lineHeight = (this.elements.input.measure(function(){ return this.getScrollSize().y; }))-this.options.padding;
+		this.elements.input.value = backupString;
+		this.elements.input.setStyle('height',this.options.lineHeight*this.options.minRows);
 		
 		// Prebind common methods - I prefer to not require MooTools More Bind, so I am doing it manually
 		this.focus = this.focus.bind(this);
@@ -109,10 +116,9 @@ var DynamicTextarea = new Class({
 		this.disable = this.disable.bind(this);
 		this.enable = this.enable.bind(this);
 		
-		window.addEvent('unload',this.clean);
-		
+		// Set the height of the textarea, based on content
 		this.checkSize(true);
-		els.input.addEvent('focus',this.focus);
+		this.elements.input.addEvent('focus',this.focus);
 		this.fireEvent('load');
 	},
 	
@@ -122,13 +128,11 @@ var DynamicTextarea = new Class({
 	// Sets up textarea to be interactive, and calls user binded focus
 	focus:function()
 	{
-		var opts = this.options, els = this.elements;
+		this.elements.parent.removeClass(this.options.basic);
+		this.elements.parent.removeClass(this.options.filled);
+		this.elements.parent.addClass(this.options.focused);
 		
-		els.parent.removeClass(opts.basic);
-		els.parent.removeClass(opts.filled);
-		els.parent.addClass(opts.focused);
-		
-		els.input.addEvents({
+		this.elements.input.addEvents({
 			'keydown':this.delayStart,
 			'keypress':this.delayStart,
 			'blur':this.blur,
@@ -140,13 +144,11 @@ var DynamicTextarea = new Class({
 	// Set's appropriate blur classes and calls user binded blur
 	blur:function()
 	{
-		var opts = this.options, els = this.elements;
+		this.elements.parent.removeClass(this.options.focused);
+		if(this.elements.input.value=='') this.elements.parent.addClass(this.options.basic);
+		else this.elements.parent.addClass(this.options.filled);
 		
-		els.parent.removeClass(opts.focused);
-		if(els.input.value=='') els.parent.addClass(opts.basic);
-		else els.parent.addClass(opts.filled);
-		
-		els.input.removeEvents({
+		this.elements.input.removeEvents({
 			'keydown':this.delayStart,
 			'keypress':this.delayStart,
 			'blur':this.blur,
@@ -159,16 +161,14 @@ var DynamicTextarea = new Class({
 	// Delay start of check because text hasn't been injected into the textarea yet
 	delayStart:function(e)
 	{
-		var opts = this.options, els = this.elements;
-		
-		if(opts.timeout=='ready' && opts.value.length<opts.max_length)
+		if(this.options.timeout=='ready' && this.options.value.length<this.options.maxLength)
 		{
-			opts.timeout = setTimeout(this.checkSize,1);
+			this.options.timeout = setTimeout(this.checkSize,1);
 			return;
 		}
 		
-		if(	(opts.max_length && opts.max_length!=null &&
-			opts.value.length>=opts.max_length &&
+		if(	(this.options.maxLength && this.options.maxLength!=null &&
+			this.options.value.length>=this.options.maxLength &&
 			e.key!='backspace' &&
 			e.key!='delete' &&
 			e.meta==false &&
@@ -177,72 +177,71 @@ var DynamicTextarea = new Class({
 			e.key!='up' &&
 			e.key!='down' &&
 			e.key!='left' &&
-			e.key!='right') || (opts.no_breaks==true && (e.key=='enter' || e.key=='return')))
+			e.key!='right') || (this.options.noBreaks==true && (e.key=='enter' || e.key=='return')))
 		{
 			e.preventDefault();
 			return;
 		}
-		if(opts.timeout=='ready') opts.timeout = setTimeout(this.checkSize,1);
+		if(this.options.timeout=='ready') this.options.timeout = setTimeout(this.checkSize,1);
 	},
 	
 	// Set text area to smallest size, and begin adjusting size
 	checkSize: function(manual)
 	{
-		var opts = this.options, els = this.elements, oldVal = opts.value;
+		var oldVal = this.options.value;
 		
-		opts.value = els.input.value;
-		opts.timeout = 0;
+		this.options.value = this.elements.input.value;
+		this.options.timeout = 0;
 		
-		if(opts.value==oldVal && manual!=true)
+		if(this.options.value==oldVal && manual!=true)
 		{
-			opts.timeout = 'ready';
+			this.options.timeout = 'ready';
 			return;
 		}
 		
-		if(oldVal==null || opts.value.length<oldVal.length)
+		if(oldVal==null || this.options.value.length<oldVal.length)
 		{
-			els.parent.setStyle('height',els.parent.getSize().y);
-			els.input.setStyle('height',opts.min_rows*opts.line_height);
+			this.elements.parent.setStyle('height',this.elements.parent.getSize().y);
+			this.elements.input.setStyle('height',this.options.minRows*this.options.lineHeight);
 		}
 		
-		var t_height = els.input.getScrollSize().y;
-		var offsetHeight = els.input.offsetHeight;
-		var cssHeight = t_height-opts.padding;
-		var scrollHeight = t_height+opts.offset;
-		if(scrollHeight!=offsetHeight && cssHeight>opts.min_rows*opts.line_height) els.input.setStyle('height',cssHeight);
+		var tempHeight = this.elements.input.getScrollSize().y;
+		var offsetHeight = this.elements.input.offsetHeight;
+		var cssHeight = tempHeight-this.options.padding;
+		var scrollHeight = tempHeight+this.options.offset;
+		if(scrollHeight!=offsetHeight && cssHeight>this.options.minRows*this.options.lineHeight) this.elements.input.setStyle('height',cssHeight);
 		
-		els.parent.setStyle('height','auto');
-		opts.timeout = 'ready';
+		this.elements.parent.setStyle('height','auto');
+		this.options.timeout = 'ready';
 		if(manual!=true) this.fireEvent('onKeyPress');
 	},
 	
 	// Reset the text area to blank
 	reset:function()
 	{
-		var opts = this.options, els = this.elements;
-		
-		els.input.value = '';
+		this.elements.input.value = '';
 		this.checkSize(true);
-		els.parent.removeClass(opts.filled);
-		els.parent.removeClass(opts.focused);
-		els.parent.addClass(opts.basic);
+		this.elements.parent.removeClass(this.options.filled);
+		this.elements.parent.removeClass(this.options.focused);
+		this.elements.parent.addClass(this.options.basic);
+		
+		this.fireEvent('reset');
 	},
 	
 	// Sets the caret to the desired position
 	setCaret:function(pos)
 	{
-		var el = this.elements.input;
 		// Standard Browsers
 		if (!document.selection)
 		{ 
-			el.selectionStart = pos;
-			el.selectionEnd = pos;
+			this.elements.input.selectionStart = pos;
+			this.elements.input.selectionEnd = pos;
 		}
 		// For IE
 		else
 		{
 			var sel = document.selection.createRange();
-			sel.moveStart('character', -el.value.length);
+			sel.moveStart('character', -this.elements.input.value.length);
 			sel.moveStart('character', pos);
 			sel.moveEnd('character', 0);
 			sel.select();
@@ -274,8 +273,8 @@ var DynamicTextarea = new Class({
 			'blur':this.blur,
 			'scroll':this.scrollFix
 		});
-		this.elements.input.set('disabled',true);
-		this.elements.parent.addClass('disabled');
+		this.elements.input.set(this.options.disabled,true);
+		this.elements.parent.addClass(this.options.disabled);
 		this.fireEvent('disable');
 	},
 	
@@ -286,8 +285,8 @@ var DynamicTextarea = new Class({
 			'focus':this.focus,
 			'scroll':this.scrollFix
 		});
-		this.elements.input.set('disabled',false);
-		this.elements.parent.removeClass('disabled');
+		this.elements.input.set(this.options.disabled,false);
+		this.elements.parent.removeClass(this.options.disabled);
 		this.fireEvent('enable');
 	}
 });
