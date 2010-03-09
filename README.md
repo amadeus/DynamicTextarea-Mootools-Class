@@ -28,5 +28,4 @@ This will ensure the textarea is always at least 2 rows tall, and only allows fo
 
 Known Issues
 -----------------
-
 Internet Explorer does not respect the max_length option, yet.
