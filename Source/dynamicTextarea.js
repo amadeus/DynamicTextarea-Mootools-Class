@@ -32,17 +32,18 @@ var DynamicTextarea = new Class({
 		filled:'filled',
 		disabled:'disabled',
 		timeout:'ready',
-		maxLength:null,
+		maxLength:Infinity,
 		lineHeight:null,
 		offset:0,
 		ctaClass:''
-		// Available Events
-		//onShow:$empty,
-		//onBlur:$empty,
-		//onKeyPress:$empty,
-		//onLoad:$empty,
-		//onDisable:$empty,
-		//onReset:$empty
+		// AVAILABLE EVENTS
+		// onShow:$empty,
+		// onBlur:$empty,
+		// onKeyPress:$empty,
+		// onLoad:$empty,
+		// onEnable:$empty,
+		// onDisable:$empty,
+		// onReset:$empty
 	},
 	
 	elements:
@@ -55,11 +56,11 @@ var DynamicTextarea = new Class({
 	initialize:function(el,options)
 	{
 		this.setOptions(options);
-		
 		this.elements.input = document.id(el);
 		if(!this.elements.input) return;
 		
-		if(window.Browser.Engine.gecko) // Firefox handles scroll heights differently than all other browsers
+		// Firefox handles scroll heights differently than all other browsers
+		if(window.Browser.Engine.gecko)
 		{
 			this.options.offset = parseInt(this.elements.input.getStyle('padding-top'),10)+parseInt(this.elements.input.getStyle('padding-bottom'),10)+parseInt(this.elements.input.getStyle('border-bottom-width'),10)+parseInt(this.elements.input.getStyle('border-top-width'),10);
 			this.options.padding = 0;
@@ -88,11 +89,10 @@ var DynamicTextarea = new Class({
 		}
 		
 		this.elements.input.set({
-			'spellcheck':false,
 			'rows':1,
 			'styles':
 			{
-				'resize':'none',
+				'resize':'none', // Disable webkit resize handle
 				'position':'relative',
 				'display':'block',
 				'overflow':'hidden',
@@ -100,6 +100,7 @@ var DynamicTextarea = new Class({
 			}
 		});
 		
+		// This is the only crossbrowser method to determine scrollheight of a single line in a textarea
 		this.elements.input.value = 'M';
 		this.options.lineHeight = (this.elements.input.measure(function(){ return this.getScrollSize().y; }))-this.options.padding;
 		this.elements.input.value = backupString;
@@ -125,7 +126,7 @@ var DynamicTextarea = new Class({
 	// For Safari (mostly), stops a small jump on textarea resize
 	scrollFix: function(){ this.elements.input.scrollTo(0,0); },
 	
-	// Sets up textarea to be interactive, and calls user binded focus
+	// Sets up textarea to be interactive, and calls focus event
 	focus:function()
 	{
 		this.elements.parent.removeClass(this.options.basic);
@@ -138,7 +139,7 @@ var DynamicTextarea = new Class({
 			'blur':this.blur,
 			'scroll':this.scrollFix
 		});
-		this.fireEvent('onFocus');
+		this.fireEvent('focus');
 	},
 	
 	// Set's appropriate blur classes and calls user binded blur
@@ -155,7 +156,7 @@ var DynamicTextarea = new Class({
 			'scroll':this.scrollFix
 		});
 		
-		this.fireEvent('onBlur');
+		this.fireEvent('blur');
 	},
 	
 	// Delay start of check because text hasn't been injected into the textarea yet
@@ -167,7 +168,9 @@ var DynamicTextarea = new Class({
 			return;
 		}
 		
-		if(	(this.options.maxLength && this.options.maxLength!=null &&
+		if(
+			(this.options.maxLength &&
+			this.options.maxLength!=null &&
 			this.options.value.length>=this.options.maxLength &&
 			e.key!='backspace' &&
 			e.key!='delete' &&
@@ -177,6 +180,7 @@ var DynamicTextarea = new Class({
 			e.key!='up' &&
 			e.key!='down' &&
 			e.key!='left' &&
+			e.key!='tab' &&
 			e.key!='right') || (this.options.noBreaks==true && (e.key=='enter' || e.key=='return')))
 		{
 			e.preventDefault();
@@ -213,7 +217,7 @@ var DynamicTextarea = new Class({
 		
 		this.elements.parent.setStyle('height','auto');
 		this.options.timeout = 'ready';
-		if(manual!=true) this.fireEvent('onKeyPress');
+		if(manual!=true) this.fireEvent('keyPress');
 	},
 	
 	// Reset the text area to blank
@@ -258,8 +262,6 @@ var DynamicTextarea = new Class({
 			'blur':this.blur,
 			'scroll':this.scrollFix
 		});
-		
-		window.removeEvent('unload',this.clean);
 	},
 	
 	// Disable input for the textarea
