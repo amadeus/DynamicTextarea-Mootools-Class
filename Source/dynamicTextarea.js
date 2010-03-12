@@ -37,7 +37,7 @@ var DynamicTextarea = new Class({
 		offset:0,
 		ctaClass:''
 		// AVAILABLE EVENTS
-		// onShow:$empty,
+		// onFocus:$empty,
 		// onBlur:$empty,
 		// onKeyPress:$empty,
 		// onLoad:$empty,
