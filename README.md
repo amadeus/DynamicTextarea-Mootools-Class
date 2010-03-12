@@ -3,6 +3,7 @@ DynamicTextarea
 Purpose: Provides a lightweight plugin for the textarea tag that dynamically resizes based on its content that has no UI glitches or quirks
 
 [Demo](http://enmassellc.com/misc/dynamicTextarea.html "Demo")
+[Shell Demo](http://mootools.net/shell/P832d/ "Shell Demo")
 
 ![Screenshot 1](http://dl.dropbox.com/u/18782/dynamicTextarea.jpg)
 

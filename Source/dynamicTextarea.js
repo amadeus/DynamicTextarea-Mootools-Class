@@ -167,7 +167,6 @@ var DynamicTextarea = new Class({
 			this.options.timeout = setTimeout(this.checkSize,1);
 			return;
 		}
-		
 		if(
 			(this.options.maxLength &&
 			this.options.maxLength!=null &&
