@@ -4,7 +4,7 @@ Purpose: Provides a lightweight plugin for the textarea tag that dynamically res
 
 [Demo](http://enmassellc.com/misc/dynamicTextarea.html "Demo")
 
-[Shell Demo](http://mootools.net/shell/P832d/ "Shell Demo")
+[Shell Demo](http://mootools.net/shell/P832d/3/ "Shell Demo")
 
 ![Screenshot 1](http://dl.dropbox.com/u/18782/dynamicTextarea.jpg)
 
