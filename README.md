@@ -8,6 +8,7 @@ Purpose: Provides a lightweight plugin for the textarea tag that dynamically res
 
 ![Screenshot 1](http://dl.dropbox.com/u/18782/dynamicTextarea.jpg)
 
+
 How to use
 ----------
 DynamicTextarea is a reusable class that can by applied to any textarea tag on a page, with any sort of CSS styling attached to it.
@@ -28,6 +29,7 @@ In Context:
 	});
 
 This will ensure the textarea is always at least 2 rows tall, and only allows for a total of 1000 characters (currently broken in IE).
+
 
 Known Issues
 -----------------
