@@ -92,7 +92,10 @@ var DynamicTextarea = new Class({
 			'rows':1,
 			'styles':
 			{
-				'resize':'none', // Disable webkit resize handle
+				'resize':'none', // Disable browser resize handles
+				'-moz-resize':'none',
+				'-webkit-resize':'none',
+				'-o-resize':'none',
 				'position':'relative',
 				'display':'block',
 				'overflow':'hidden',
