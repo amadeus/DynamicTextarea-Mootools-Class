@@ -8,90 +8,59 @@ authors:
 - Amadeus Demarzi (http://enmassellc.com/)
 
 requires:
- core/1.2.4: '*'
- more/1.2.4:
-  - Element.Measure
+ core/1.3: '*'
 
 provides: [DynamicTextarea]
 ...
 */
 
 var DynamicTextarea = new Class({
-	
-	Implements:[Options,Events],
-	
-	options:
-	{
+
+	Implements:[Options, Events],
+
+	options: {
 		value:'',
 		minRows:1,
-		string:'',
-		noBreaks:false,
-		value:null,
-		basic:'default',
-		focused:'focused',
-		filled:'filled',
-		disabled:'disabled',
-		timeout:'ready',
-		maxLength:Infinity,
+		delay:true,
 		lineHeight:null,
-		offset:0,
-		ctaClass:''
+		offset:0
 		// AVAILABLE EVENTS
 		// onFocus:$empty,
 		// onBlur:$empty,
 		// onKeyPress:$empty,
+		// onResize:$empty,
 		// onLoad:$empty,
 		// onEnable:$empty,
-		// onDisable:$empty,
-		// onReset:$empty
+		// onDisable:$empty
 	},
-	
-	elements:
-	{
-		input:null,
-		parent:null,
-		cta:null
-	},
-	
-	initialize:function(el,options)
-	{
+
+	textarea:null,
+
+	initialize:function(textarea,options) {
 		this.setOptions(options);
-		this.elements.input = document.id(el);
-		if(!this.elements.input) return;
-		
+		this.textarea = document.id(textarea);
+		if (!this.textarea) return;
+
 		// Firefox handles scroll heights differently than all other browsers
-		if(window.Browser.Engine.gecko)
-		{
-			this.options.offset = parseInt(this.elements.input.getStyle('padding-top'),10)+parseInt(this.elements.input.getStyle('padding-bottom'),10)+parseInt(this.elements.input.getStyle('border-bottom-width'),10)+parseInt(this.elements.input.getStyle('border-top-width'),10);
+		if (window.Browser.firefox) {
+			this.options.offset =
+				parseInt(this.textarea.getStyle('padding-top'),10) +
+				parseInt(this.textarea.getStyle('padding-bottom'),10) +
+				parseInt(this.textarea.getStyle('border-bottom-width'),10) +
+				parseInt(this.textarea.getStyle('border-top-width'),10);
 			this.options.padding = 0;
+		} else {
+			this.options.offset =
+				parseInt(this.textarea.getStyle('border-bottom-width'),10) +
+				parseInt(this.textarea.getStyle('border-top-width'),10);
+			this.options.padding =
+				parseInt(this.textarea.getStyle('padding-top'),10) +
+				parseInt(this.textarea.getStyle('padding-bottom'),10);
 		}
-		else
-		{
-			this.options.offset = parseInt(this.elements.input.getStyle('border-bottom-width'),10)+parseInt(this.elements.input.getStyle('border-top-width'),10);
-			this.options.padding = parseInt(this.elements.input.getStyle('padding-top'),10)+parseInt(this.elements.input.getStyle('padding-bottom'),10);
-		}
-		
-		this.elements.parent = this.elements.input.getParent();
-		if(this.options.string!='' && window.OverText)
-		{
-			this.elements.cta = new OverText(this.elements.input,{
-				textOverride:this.options.string,
-				labelClass:this.options.ctaClass
-			});
-		}
-		
-		var backupString = '';
-		if(this.elements.input.value=='') this.elements.parent.addClass(this.options.basic);
-		else
-		{
-			backupString = this.elements.input.value;
-			this.elements.parent.addClass(this.options.filled);
-		}
-		
-		this.elements.input.set({
+
+		this.textarea.set({
 			'rows':1,
-			'styles':
-			{
+			'styles': {
 				'resize':'none', // Disable browser resize handles
 				'-moz-resize':'none',
 				'-webkit-resize':'none',
@@ -102,195 +71,123 @@ var DynamicTextarea = new Class({
 				'height':'auto'
 			}
 		});
-		
+
+		// Prebind common methods
+		['focus','delayCheck','blur','scrollFix','checkSize','clean','disable','enable','getLineHeight'].each(function(method){
+			this[method] = this[method].bind(this);
+		},this);
+
 		// This is the only crossbrowser method to determine scrollheight of a single line in a textarea
-		this.elements.input.value = 'M';
-		this.options.lineHeight = (this.elements.input.measure(function(){ return this.getScrollSize().y; }))-this.options.padding;
-		this.elements.input.value = backupString;
-		this.elements.input.setStyle('height',this.options.lineHeight*this.options.minRows);
+		this.getLineHeight();
 		
-		// Prebind common methods - I prefer to not require MooTools More Bind, so I am doing it manually
-		this.focus = this.focus.bind(this);
-		this.delayStart = this.delayStart.bindWithEvent(this);
-		this.delayStart = this.delayStart.bindWithEvent(this);
-		this.blur = this.blur.bind(this);
-		this.scrollFix = this.scrollFix.bind(this);
-		this.checkSize = this.checkSize.bind(this);
-		this.clean = this.clean.bind(this);
-		this.disable = this.disable.bind(this);
-		this.enable = this.enable.bind(this);
-		
+		this.fireEvent('load');
+
 		// Set the height of the textarea, based on content
 		this.checkSize(true);
-		this.elements.input.addEvent('focus',this.focus);
-		this.fireEvent('load');
+		this.textarea.addEvent('focus',this.focus);
 	},
 	
+	getLineHeight:function(){
+		var backupValue = this.textarea.value;
+		this.textarea.value = 'M';
+		this.options.lineHeight = this.textarea.getScrollSize().y - this.options.padding;
+		this.textarea.value = backupValue;
+		this.textarea.setStyle('height', this.options.lineHeight * this.options.minRows);
+	},
+
 	// For Safari (mostly), stops a small jump on textarea resize
-	scrollFix: function(){ this.elements.input.scrollTo(0,0); },
-	
+	scrollFix: function(){
+		this.textarea.scrollTo(0,0);
+	},
+
 	// Sets up textarea to be interactive, and calls focus event
-	focus:function()
-	{
-		this.elements.parent.removeClass(this.options.basic);
-		this.elements.parent.removeClass(this.options.filled);
-		this.elements.parent.addClass(this.options.focused);
-		
-		this.elements.input.addEvents({
-			'keydown':this.delayStart,
-			'keypress':this.delayStart,
+	focus: function(){
+		this.textarea.addEvents({
+			'keydown':this.delayCheck,
+			'keypress':this.delayCheck,
 			'blur':this.blur,
 			'scroll':this.scrollFix
 		});
 		this.fireEvent('focus');
 	},
-	
-	// Set's appropriate blur classes and calls user binded blur
-	blur:function()
-	{
-		this.elements.parent.removeClass(this.options.focused);
-		if(this.elements.input.value=='') this.elements.parent.addClass(this.options.basic);
-		else this.elements.parent.addClass(this.options.filled);
-		
-		this.elements.input.removeEvents({
-			'keydown':this.delayStart,
-			'keypress':this.delayStart,
+
+	// Sets appropriate blur classes and calls user binded blur
+	blur: function(){
+		this.textarea.removeEvents({
+			'keydown':this.delayCheck,
+			'keypress':this.delayCheck,
 			'blur':this.blur,
 			'scroll':this.scrollFix
 		});
-		
 		this.fireEvent('blur');
 	},
-	
+
 	// Delay start of check because text hasn't been injected into the textarea yet
-	delayStart:function(e)
-	{
-		if(this.options.timeout=='ready' && this.options.value.length<this.options.maxLength)
-		{
-			this.options.timeout = setTimeout(this.checkSize,1);
-			return;
-		}
-		if(
-			(this.options.maxLength &&
-			this.options.maxLength!=null &&
-			this.options.value.length>=this.options.maxLength &&
-			e.key!='backspace' &&
-			e.key!='delete' &&
-			e.meta==false &&
-			e.control==false &&
-			e.shift==false &&
-			e.key!='up' &&
-			e.key!='down' &&
-			e.key!='left' &&
-			e.key!='tab' &&
-			e.key!='right') || (this.options.noBreaks==true && (e.key=='enter' || e.key=='return')))
-		{
-			e.preventDefault();
-			return;
-		}
-		if(this.options.timeout=='ready') this.options.timeout = setTimeout(this.checkSize,1);
+	delayCheck: function(){
+		if (this.options.delay === true)
+			this.options.delay = this.checkSize.delay(1);
 	},
-	
-	// Set text area to smallest size, and begin adjusting size
-	checkSize: function(manual)
-	{
-		var oldVal = this.options.value;
-		
-		this.options.value = this.elements.input.value;
-		this.options.timeout = 0;
-		
-		if(this.options.value==oldVal && manual!=true)
-		{
-			this.options.timeout = 'ready';
-			return;
+
+	// Check size of the textarea, to determine if it needs to be resized or not, and resize if necessary
+	checkSize: function(manual) {
+		var oldValue = this.options.value;
+
+		this.options.value = this.textarea.value;
+		this.options.delay = false;
+
+		if (this.options.value === oldValue && manual!==true)
+			return this.options.delay = true;
+
+		if (!oldValue || this.options.value.length < oldValue.length)
+			this.textarea.setStyle('height', this.options.minRows * this.options.lineHeight);
+
+		var tempHeight = this.textarea.getScrollSize().y,
+			offsetHeight = this.textarea.offsetHeight,
+			cssHeight = tempHeight-this.options.padding,
+			scrollHeight = tempHeight+this.options.offset;
+
+		if (scrollHeight !== offsetHeight && cssHeight > this.options.minRows * this.options.lineHeight){
+			this.textarea.setStyle('height',cssHeight);
+			this.fireEvent('resize');
 		}
-		
-		if(oldVal==null || this.options.value.length<oldVal.length)
-		{
-			this.elements.parent.setStyle('height',this.elements.parent.getSize().y);
-			this.elements.input.setStyle('height',this.options.minRows*this.options.lineHeight);
-		}
-		
-		var tempHeight = this.elements.input.getScrollSize().y;
-		var offsetHeight = this.elements.input.offsetHeight;
-		var cssHeight = tempHeight-this.options.padding;
-		var scrollHeight = tempHeight+this.options.offset;
-		if(scrollHeight!=offsetHeight && cssHeight>this.options.minRows*this.options.lineHeight) this.elements.input.setStyle('height',cssHeight);
-		
-		this.elements.parent.setStyle('height','auto');
-		this.options.timeout = 'ready';
-		if(manual!=true) this.fireEvent('keyPress');
+
+		this.options.delay = true;
+		if (manual !== true)
+			this.fireEvent('keyPress');
 	},
-	
-	// Reset the text area to blank
-	reset:function()
-	{
-		this.elements.input.value = '';
-		this.checkSize(true);
-		this.elements.parent.removeClass(this.options.filled);
-		this.elements.parent.removeClass(this.options.focused);
-		this.elements.parent.addClass(this.options.basic);
-		
-		this.fireEvent('reset');
-	},
-	
-	// Sets the caret to the desired position
-	setCaret:function(pos)
-	{
-		// Standard Browsers
-		if (!document.selection)
-		{ 
-			this.elements.input.selectionStart = pos;
-			this.elements.input.selectionEnd = pos;
-		}
-		// For IE
-		else
-		{
-			var sel = document.selection.createRange();
-			sel.moveStart('character', -this.elements.input.value.length);
-			sel.moveStart('character', pos);
-			sel.moveEnd('character', 0);
-			sel.select();
-		}
-	},
-	
+
 	// Clean out this textarea's event handlers
-	clean:function()
-	{
-		this.elements.input.removeEvents({
+	clean: function(){
+		this.textarea.removeEvents({
 			'focus':this.focus,
-			'keydown':this.delayStart,
-			'keypress':this.delayStart,
+			'keydown':this.delayCheck,
+			'keypress':this.delayCheck,
 			'blur':this.blur,
 			'scroll':this.scrollFix
 		});
 	},
-	
+
 	// Disable input for the textarea
-	disable:function()
-	{   
-		this.elements.input.blur();
-		this.elements.input.removeEvents({
+	disable: function(){
+		this.textarea.blur();
+		this.textarea.removeEvents({
 			'focus':this.focus,
-			'keydown':this.delayStart,
-			'keypress':this.delayStart,
+			'keydown':this.delayCheck,
+			'keypress':this.delayCheck,
 			'blur':this.blur,
 			'scroll':this.scrollFix
 		});
-		this.elements.input.set(this.options.disabled,true);
-		this.elements.parent.addClass(this.options.disabled);
+		this.textarea.set(this.options.disabled,true);
 		this.fireEvent('disable');
 	},
-	
+
 	// Enable input for the textarea
-	enable:function()
-	{
-		this.elements.input.addEvents({
+	enable: function(){
+		this.textarea.addEvents({
 			'focus':this.focus,
 			'scroll':this.scrollFix
 		});
-		this.elements.input.set(this.options.disabled,false);
-		this.elements.parent.removeClass(this.options.disabled);
+		this.textarea.set(this.options.disabled,false);
 		this.fireEvent('enable');
 	}
 });

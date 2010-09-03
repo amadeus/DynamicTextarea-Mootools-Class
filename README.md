@@ -4,16 +4,12 @@ Purpose: Provides a lightweight plugin for the textarea tag that dynamically res
 
 [Demo](http://enmassellc.com/misc/dynamicTextarea.html "Demo")
 
-[Shell Demo](http://mootools.net/shell/P832d/3/ "Shell Demo")
-
 ![Screenshot 1](http://dl.dropbox.com/u/18782/dynamicTextarea.jpg)
 
 
 How to use
 ----------
-DynamicTextarea is a reusable class that can by applied to any textarea tag on a page, with any sort of CSS styling attached to it.
-
-It is recommended that you surround the textarea with a display:block type container to ensure ux integrity.
+DynamicTextarea is a reusable class that can by applied to any textarea tag on a page with any sort of CSS styling attached to it.
 
 Constructor:
 
@@ -23,14 +19,8 @@ Constructor:
 	
 In Context:
 
-	var input = new DynamicTextarea($('myInput'),{
+	var input = new DynamicTextarea('myInput',{
 		minRows:2,
-		maxLength:1000
 	});
 
-This will ensure the textarea is always at least 2 rows tall, and only allows for a total of 1000 characters (currently broken in IE).
-
-
-Known Issues
------------------
-Internet Explorer does not respect the maxLength option, yet.
+This will ensure the textarea is always at least 2 rows tall.
