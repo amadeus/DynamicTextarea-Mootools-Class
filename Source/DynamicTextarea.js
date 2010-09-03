@@ -8,7 +8,7 @@ authors:
 - Amadeus Demarzi (http://enmassellc.com/)
 
 requires:
- core/1.2.4+: '*'
+ core/1.2.4+: [Core/Class, Core/Element, Core/Element.Event, Core/Element.Style, Core/Element.Dimensions]
 
 provides: [DynamicTextarea]
 ...
@@ -24,12 +24,16 @@ var DynamicTextarea = new Class({
 		delay:true,
 		lineHeight:null,
 		offset:0
+
 		// AVAILABLE EVENTS
+		// onInit:$empty,
+
 		// onFocus:$empty,
 		// onBlur:$empty,
+
 		// onKeyPress:$empty,
 		// onResize:$empty,
-		// onLoad:$empty,
+
 		// onEnable:$empty,
 		// onDisable:$empty
 	},
@@ -37,15 +41,16 @@ var DynamicTextarea = new Class({
 	textarea:null,
 
 	initialize:function(textarea,options) {
-		this.setOptions(options);
 		this.textarea = document.id(textarea);
-
 		if (!this.textarea) return;
 
+		this.setOptions(options);
+
 		// Prebind common methods
-		['focus','delayCheck','blur','scrollFix','checkSize','clean','disable','enable','getLineHeight'].each(function(method){
-			this[method] = this[method].bind(this);
-		},this);
+		['focus','delayCheck','blur','scrollFix','checkSize','clean','disable','enable','getLineHeight']
+			.each(function(method){
+				this[method] = this[method].bind(this);
+			},this);
 
 		// Firefox and Opera handle scroll heights differently than all other browsers
 		if (window.Browser.firefox || window.Browser.opera) {
@@ -80,7 +85,7 @@ var DynamicTextarea = new Class({
 
 		this.getLineHeight();
 
-		this.fireEvent('load');
+		this.fireEvent('init');
 
 		// Set the height of the textarea, based on content
 		this.checkSize(true);
