@@ -1,6 +1,6 @@
 DynamicTextarea
 ===========
-Purpose: Provides a lightweight plugin for the textarea tag that dynamically resizes based on its content that has no UI glitches or quirks
+Purpose: Provides a lightweight plugin for the textarea tag that dynamically resizes based on its content that has no UI glitches or quirks. MooTools 1.3 compatible!
 
 [Demo](http://enmassellc.com/misc/dynamicTextarea.html "Demo")
 
@@ -24,3 +24,8 @@ In Context:
 	});
 
 This will ensure the textarea is always at least 2 rows tall.
+
+
+Notes
+----------
+Opera fails with certain CSS styles, so please test Opera and disable for them if necessary.

@@ -8,7 +8,7 @@ authors:
 - Amadeus Demarzi (http://enmassellc.com/)
 
 requires:
- core/1.3: '*'
+ core/1.2.4+: '*'
 
 provides: [DynamicTextarea]
 ...
@@ -39,10 +39,16 @@ var DynamicTextarea = new Class({
 	initialize:function(textarea,options) {
 		this.setOptions(options);
 		this.textarea = document.id(textarea);
+
 		if (!this.textarea) return;
 
-		// Firefox handles scroll heights differently than all other browsers
-		if (window.Browser.firefox) {
+		// Prebind common methods
+		['focus','delayCheck','blur','scrollFix','checkSize','clean','disable','enable','getLineHeight'].each(function(method){
+			this[method] = this[method].bind(this);
+		},this);
+
+		// Firefox and Opera handle scroll heights differently than all other browsers
+		if (window.Browser.firefox || window.Browser.opera) {
 			this.options.offset =
 				parseInt(this.textarea.getStyle('padding-top'),10) +
 				parseInt(this.textarea.getStyle('padding-bottom'),10) +
@@ -58,13 +64,13 @@ var DynamicTextarea = new Class({
 				parseInt(this.textarea.getStyle('padding-bottom'),10);
 		}
 
+		// Disable browser resize handles, set appropriate styles
 		this.textarea.set({
 			'rows':1,
 			'styles': {
-				'resize':'none', // Disable browser resize handles
+				'resize':'none',
 				'-moz-resize':'none',
 				'-webkit-resize':'none',
-				'-o-resize':'none',
 				'position':'relative',
 				'display':'block',
 				'overflow':'hidden',
@@ -72,12 +78,6 @@ var DynamicTextarea = new Class({
 			}
 		});
 
-		// Prebind common methods
-		['focus','delayCheck','blur','scrollFix','checkSize','clean','disable','enable','getLineHeight'].each(function(method){
-			this[method] = this[method].bind(this);
-		},this);
-
-		// This is the only crossbrowser method to determine scrollheight of a single line in a textarea
 		this.getLineHeight();
 
 		this.fireEvent('load');
@@ -87,6 +87,7 @@ var DynamicTextarea = new Class({
 		this.textarea.addEvent('focus',this.focus);
 	},
 
+	// This is the only crossbrowser method to determine scrollheight of a single line in a textarea (that I am aware of)
 	getLineHeight:function(){
 		var backupValue = this.textarea.value;
 		this.textarea.value = 'M';
@@ -95,12 +96,12 @@ var DynamicTextarea = new Class({
 		this.textarea.setStyle('height', this.options.lineHeight * this.options.minRows);
 	},
 
-	// For Safari (mostly), stops a small jump on textarea resize
+	// Stops a small scroll jump on some browsers
 	scrollFix: function(){
 		this.textarea.scrollTo(0,0);
 	},
 
-	// Sets up textarea to be interactive, and calls focus event
+	// Add interactive events, and fire focus event
 	focus: function(){
 		this.textarea.addEvents({
 			'keydown':this.delayCheck,
@@ -111,7 +112,7 @@ var DynamicTextarea = new Class({
 		this.fireEvent('focus');
 	},
 
-	// Sets appropriate blur classes and calls user binded blur
+	// Clean out extraneaous events, and fire blur event
 	blur: function(){
 		this.textarea.removeEvents({
 			'keydown':this.delayCheck,
@@ -122,13 +123,13 @@ var DynamicTextarea = new Class({
 		this.fireEvent('blur');
 	},
 
-	// Delay start of check because text hasn't been injected into the textarea yet
+	// Delay checkSize because text hasn't been injected into the textarea yet
 	delayCheck: function(){
 		if (this.options.delay === true)
 			this.options.delay = this.checkSize.delay(1);
 	},
 
-	// Check size of the textarea, to determine if it needs to be resized or not, and resize if necessary
+	// Determine if it needs to be resized or not, and resize if necessary
 	checkSize: function(manual) {
 		var oldValue = this.options.value;
 
@@ -156,7 +157,7 @@ var DynamicTextarea = new Class({
 			this.fireEvent('keyPress');
 	},
 
-	// Clean out this textarea's event handlers
+	// Permanently clean out this textarea's event handlers
 	clean: function(){
 		this.textarea.removeEvents({
 			'focus':this.focus,
@@ -167,7 +168,7 @@ var DynamicTextarea = new Class({
 		});
 	},
 
-	// Disable input for the textarea
+	// Disable the textarea
 	disable: function(){
 		this.textarea.blur();
 		this.textarea.removeEvents({
@@ -181,7 +182,7 @@ var DynamicTextarea = new Class({
 		this.fireEvent('disable');
 	},
 
-	// Enable input for the textarea
+	// Enables the textarea
 	enable: function(){
 		this.textarea.addEvents({
 			'focus':this.focus,

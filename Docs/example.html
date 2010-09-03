@@ -20,7 +20,7 @@
 	<script>
 		window.addEvent('domready',function(){
 			new DynamicTextarea('default'); // Default Textarea, takes no options
-			
+
 			new DynamicTextarea('customEvents',{ // Custom Textarea, takes options object
 				minRows:2,
 				onLoad: function() {
@@ -36,9 +36,9 @@
 						this.textarea.value = 'I am at least 2 rows high';
 				}
 			});
-			
+
 			new DynamicTextarea('customExtra');
-			
+
 			new DynamicTextarea('customFilled');
 		});
 	</script>
@@ -48,17 +48,17 @@
 		<h1>Default TextArea <small>(No styling or custom options)</small></h1>
 		<textarea id="default"></textarea>
 	</div>
-	
+
 	<div>
 		<h1>Custom TextArea 1 <small>(CSS Styles, custom onBlur and onFocus events, 2 row minimum height)</small></h1>
 		<textarea id="customEvents">I am at least 2 rows high</textarea>
 	</div>
-	
+
 	<div>
 		<h1>Custom TextArea 2 <small>(Always appears to have an extra line of space underneath to encourage more content)</small></h1>
 		<textarea id="customExtra"></textarea>
 	</div>
-	
+
 	<div>
 		<h1>Custom TextArea 3 <small>(Preloaded with lots of content)</small></h1>
 		<textarea id="customFilled">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</textarea>
