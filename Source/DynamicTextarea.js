@@ -79,14 +79,14 @@ var DynamicTextarea = new Class({
 
 		// This is the only crossbrowser method to determine scrollheight of a single line in a textarea
 		this.getLineHeight();
-		
+
 		this.fireEvent('load');
 
 		// Set the height of the textarea, based on content
 		this.checkSize(true);
 		this.textarea.addEvent('focus',this.focus);
 	},
-	
+
 	getLineHeight:function(){
 		var backupValue = this.textarea.value;
 		this.textarea.value = 'M';
