@@ -8,13 +8,18 @@ authors:
 - Amadeus Demarzi (http://enmassellc.com/)
 
 requires:
- core/1.2.4+: [Core/Class, Core/Element, Core/Element.Event, Core/Element.Style, Core/Element.Dimensions]
+ core/1.3: [Core/Class, Core/Element, Core/Element.Event, Core/Element.Style, Core/Element.Dimensions]
 
 provides: [DynamicTextarea]
 ...
 */
 
-var DynamicTextarea = new Class({
+(function(){
+
+// Prevent the plugin from overwriting existing variables
+if (this.DynamicTextarea) return;
+
+var DynamicTextarea = this.DynamicTextarea = new Class({
 
 	Implements:[Options, Events],
 
@@ -55,6 +60,7 @@ var DynamicTextarea = new Class({
 			},this);
 
 		// Firefox and Opera handle scroll heights differently than all other browsers
+		
 		if (window.Browser.firefox || window.Browser.opera) {
 			this.options.offset =
 				parseInt(this.textarea.getStyle('padding-top'),10) +
@@ -86,8 +92,7 @@ var DynamicTextarea = new Class({
 
 		this.getLineHeight();
 
-		if (this.fireEvent) this.fireEvent('init');
-		else this.triggerEvent('init');
+		this.triggerEvent('init');
 
 		// Set the height of the textarea, based on content
 		this.checkSize(true);
@@ -116,8 +121,7 @@ var DynamicTextarea = new Class({
 			'blur':this.blur,
 			'scroll':this.scrollFix
 		});
-		if (this.fireEvent) this.fireEvent('focus');
-		else this.triggerEvent('focus');
+		this.triggerEvent('focus');
 	},
 
 	// Clean out extraneaous events, and fire blur event
@@ -128,8 +132,7 @@ var DynamicTextarea = new Class({
 			'blur':this.blur,
 			'scroll':this.scrollFix
 		});
-		if (this.fireEvent) this.fireEvent('blur');
-		else this.triggerEvent('blur');
+		this.triggerEvent('blur');
 	},
 
 	// Delay checkSize because text hasn't been injected into the textarea yet
@@ -158,15 +161,12 @@ var DynamicTextarea = new Class({
 
 		if (scrollHeight !== offsetHeight && cssHeight > this.options.minRows * this.options.lineHeight){
 			this.textarea.setStyle('height',cssHeight);
-			if (this.fireEvent) this.fireEvent('resize');
-			else this.triggerEvent('resize');
+			this.triggerEvent('resize');
 		}
 
 		this.options.delay = true;
-		if (manual !== true){
-			if (this.fireEvent) this.fireEvent('keyPress');
-			else this.triggerEvent('keyPress');
-		}
+		if (manual !== true)
+			this.triggerEvent('keyPress');
 	},
 
 	// Clean out this textarea's event handlers
@@ -185,8 +185,7 @@ var DynamicTextarea = new Class({
 		this.textarea.blur();
 		this.clean();
 		this.textarea.set(this.options.disabled,true);
-		if (this.fireEvent) this.fireEvent('disable');
-		else this.triggerEvent('disable');
+		this.triggerEvent('disable');
 	},
 
 	// Enables the textarea
@@ -196,7 +195,8 @@ var DynamicTextarea = new Class({
 			'scroll':this.scrollFix
 		});
 		this.textarea.set(this.options.disabled,false);
-		if (this.fireEvent) this.fireEvent('enable');
-		else this.triggerEvent('enable');
+		this.triggerEvent('enable');
 	}
 });
+
+})();
