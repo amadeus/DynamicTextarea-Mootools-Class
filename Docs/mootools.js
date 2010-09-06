@@ -24,7 +24,7 @@ provides: [Core, MooTools, Type, typeOf, instanceOf]
 
 this.MooTools = {
 	version: '1.3dev',
-	build: '48f9611d30fea60ed2d913402e7033eba84c500d'
+	build: '7f4f976f08e31fb0a0f69d04d11da5b617a120a7'
 };
 
 // typeOf, instanceOf
@@ -193,7 +193,7 @@ var implement = function(name, method){
 		if (typeOf(hook) == 'type') implement.call(hook, name, method);
 		else hook.call(this, name, method);
 	}
-
+	
 	var previous = this.prototype[name];
 	if (previous == null || !previous.$protected) this.prototype[name] = method;
 
@@ -378,6 +378,14 @@ Object.extend({
 
 ['Object', 'WhiteSpace', 'TextNode', 'Collection', 'Arguments'].each(function(name){
 	new Type(name);
+});
+
+// Unique ID
+
+var UID = Date.now();
+
+String.extend('generateUID', function(){
+	return (UID++).toString(36);
 });
 
 
@@ -1379,6 +1387,18 @@ var removeOn = function(string){
 	});
 };
 
+var triggerEvent = function(type, args, delay){
+	type = removeOn(type);
+	var events = this.$events[type];
+	if (!events) return this;
+	args = Array.from(args);
+	events.each(function(fn){
+		if (delay) fn.delay(delay, this, args);
+		else fn.apply(this, args);
+	}, this);
+	return this;
+};
+
 this.Events = new Class({
 
 	$events: {},
@@ -1398,22 +1418,15 @@ this.Events = new Class({
 		return this;
 	},
 
-	fireEvent: function(type, args, delay){
-		type = removeOn(type);
-		var events = this.$events[type];
-		if (!events) return this;
-		args = Array.from(args);
-		events.each(function(fn){
-			if (delay) fn.delay(delay, this, args);
-			else fn.apply(this, args);
-		}, this);
-		return this;
-	},
-
+	triggerEvent: triggerEvent,
+	
 	removeEvent: function(type, fn){
 		type = removeOn(type);
 		var events = this.$events[type];
-		if (events && !fn.internal) events.erase(fn);
+		if (events && !fn.internal){
+			var index =  events.indexOf(fn);
+			if (index != -1) delete events[index];
+		}
 		return this;
 	},
 
@@ -1433,6 +1446,8 @@ this.Events = new Class({
 	}
 
 });
+
+
 
 this.Options = new Class({
 
@@ -2936,7 +2951,7 @@ Element.implement({
 	},
 
 	hasClass: function(className){
-		return this.className.contains(className, ' ');
+		return this.className.clean().contains(className, ' ');
 	},
 
 	addClass: function(className){
@@ -3088,12 +3103,20 @@ Element.implement({
 			if (prop && element[prop]) node[prop] = element[prop];
 		};
 
+		var i;
 		if (contents){
 			var ce = clone.getElementsByTagName('*'), te = this.getElementsByTagName('*');
-			for (var i = ce.length; i--;) clean(ce[i], te[i]);
+			for (i = ce.length; i--;) clean(ce[i], te[i]);
 		}
 
 		clean(clone, this);
+		if (Browser.ie){
+			var ts = this.getElementsByTagName('object'),
+				cs = clone.getElementsByTagName('object'),
+				tl = ts.length, cl = cs.length;
+			for (i = 0; i < tl && i < cl; i++)
+				cs[i].outerHTML = ts[i].outerHTML;
+		}
 		return document.id(clone);
 	},
 
@@ -3457,6 +3480,18 @@ Element.Properties.events = {set: function(events){
 	this.addEvents(events);
 }};
 
+var triggerEvent = function(type, args, delay){
+	var events = this.retrieve('events');
+	if (!events || !events[type]) return this;
+	args = Array.from(args);
+
+	events[type].keys.each(function(fn){
+		if (delay) fn.delay(delay, this, args);
+		else fn.apply(this, args);
+	}, this);
+	return this;
+};
+
 [Element, Window, Document].invoke('implement', {
 
 	addEvent: function(type, fn){
@@ -3498,10 +3533,12 @@ Element.Properties.events = {set: function(events){
 	removeEvent: function(type, fn){
 		var events = this.retrieve('events');
 		if (!events || !events[type]) return this;
-		var index = events[type].keys.indexOf(fn);
+		var list = events[type];
+		var index = list.keys.indexOf(fn);
 		if (index == -1) return this;
-		events[type].keys.splice(index, 1);
-		var value = events[type].values.splice(index, 1)[0];
+		var value = list.values[index];
+		delete list.keys[index];
+		delete list.values[index];
 		var custom = Element.Events[type];
 		if (custom){
 			if (custom.onRemove) custom.onRemove.call(this, fn);
@@ -3527,22 +3564,15 @@ Element.Properties.events = {set: function(events){
 			for (type in attached) this.removeEvents(type);
 			this.eliminate('events');
 		} else if (attached[events]){
-			while (attached[events].keys[0]) this.removeEvent(events, attached[events].keys[0]);
+			var list = attached[events].keys;
+			for (var i = list.length; i--;)
+				this.removeEvent(events, list[i]);
 			delete attached[events];
 		}
 		return this;
 	},
 
-	fireEvent: function(type, args, delay){
-		var events = this.retrieve('events');
-		if (!events || !events[type]) return this;
-		args = Array.from(args);
-		events[type].keys.each(function(fn){
-			if (delay) fn.delay(delay, this, args);
-			else fn.apply(this, args);
-		}, this);
-		return this;
-	},
+	triggerEvent: triggerEvent,
 
 	cloneEvents: function(from, type){
 		from = document.id(from);
@@ -3559,6 +3589,8 @@ Element.Properties.events = {set: function(events){
 	}
 
 });
+
+
 
 Element.NativeEvents = {
 	click: 2, dblclick: 2, mouseup: 2, mousedown: 2, contextmenu: 2, //mouse buttons
@@ -3962,16 +3994,16 @@ var Fx = this.Fx = new Class({
 	},
 
 	onStart: function(){
-		this.fireEvent('start', this.subject);
+		this.triggerEvent('start', this.subject);
 	},
 
 	onComplete: function(){
-		this.fireEvent('complete', this.subject);
-		if (!this.callChain()) this.fireEvent('chainComplete', this.subject);
+		this.triggerEvent('complete', this.subject);
+		if (!this.callChain()) this.triggerEvent('chainComplete', this.subject);
 	},
 
 	onCancel: function(){
-		this.fireEvent('cancel', this.subject).clearChain();
+		this.triggerEvent('cancel', this.subject).clearChain();
 	},
 
 	pause: function(){
@@ -4495,17 +4527,22 @@ provides: Request
 
 (function(){
 
+var progressSupport = ('onprogress' in new Browser.Request);
+
 var Request = this.Request = new Class({
 
 	Implements: [Chain, Events, Options],
 
 	options: {/*
-		onRequest: nil,
-		onComplete: nil,
-		onCancel: nil,
-		onSuccess: nil,
-		onFailure: nil,
-		onException: nil,*/
+		onRequest: function(){},
+		onLoadstart: function(event, xhr){},
+		onProgress: function(event, xhr){},
+		onComplete: function(){},
+		onCancel: function(){},
+		onSuccess: function(responseText, responseXML){},
+		onFailure: function(xhr){},
+		onException: function(headerName, value){},
+		onTimeout: function(){},*/
 		url: '',
 		data: '',
 		headers: {
@@ -4522,6 +4559,7 @@ var Request = this.Request = new Class({
 		encoding: 'utf-8',
 		evalScripts: false,
 		evalResponse: false,
+		timeout: 0,
 		noCache: false
 	},
 
@@ -4539,17 +4577,21 @@ var Request = this.Request = new Class({
 			this.status = this.xhr.status;
 		}.bind(this));
 		this.xhr.onreadystatechange = function(){};
-		if (this.options.isSuccess.call(this, this.status)){
-			this.response = {text: (this.xhr.responseText || ''), xml: this.xhr.responseXML};
+		clearTimeout(this.timer);
+		this.response = {text: (this.xhr.responseText || ''), xml: this.xhr.responseXML};
+		if (this.options.isSuccess.call(this, this.status))
 			this.success(this.response.text, this.response.xml);
-		} else {
-			this.response = {text: null, xml: null};
+		else
 			this.failure();
-		}
 	},
 
 	isSuccess: function(){
-		return ((this.status >= 200) && (this.status < 300));
+		var status = this.status;
+		return ((status >= 200 && status < 300) || status == 1223); // IE
+	},
+
+	isRunning: function(){
+		return !!this.running;
 	},
 
 	processScripts: function(text){
@@ -4562,7 +4604,7 @@ var Request = this.Request = new Class({
 	},
 
 	onSuccess: function(){
-		this.fireEvent('complete', arguments).fireEvent('success', arguments).callChain();
+		this.triggerEvent('complete', arguments).triggerEvent('success', arguments).callChain();
 	},
 
 	failure: function(){
@@ -4570,7 +4612,19 @@ var Request = this.Request = new Class({
 	},
 
 	onFailure: function(){
-		this.fireEvent('complete').fireEvent('failure', this.xhr);
+		this.triggerEvent('complete').triggerEvent('failure', this.xhr);
+	},
+	
+	loadstart: function(event){
+		this.triggerEvent('loadstart', [event, this.xhr]);
+	},
+	
+	progress: function(event){
+		this.triggerEvent('progress', [event, this.xhr]);
+	},
+	
+	timeout: function(){
+		this.triggerEvent('timeout', this.xhr);
 	},
 
 	setHeader: function(name, value){
@@ -4622,7 +4676,7 @@ var Request = this.Request = new Class({
 			method = 'post';
 		}
 
-		if (this.options.urlEncoded && method == 'post'){
+		if (this.options.urlEncoded && ['post', 'put'].contains(method)){
 			var encoding = (this.options.encoding) ? '; charset=' + this.options.encoding : '';
 			this.headers['Content-type'] = 'application/x-www-form-urlencoded' + encoding;
 		}
@@ -4633,28 +4687,34 @@ var Request = this.Request = new Class({
 		if (trimPosition > -1 && (trimPosition = url.indexOf('#')) > -1) url = url.substr(0, trimPosition);
 
 		if (this.options.noCache)
-			url += (url.contains('?') ? '&' : '?') + 'noCache=' + Date.now();
+			url += (url.contains('?') ? '&' : '?') + String.generateUID();
 
 		if (data && method == 'get'){
 			url += (url.contains('?') ? '&' : '?') + data;
 			data = null;
 		}
 
+		if (progressSupport){
+			this.xhr.onloadstart = this.loadstart.bind(this);
+			this.xhr.onprogress = this.progress.bind(this);
+		}
+		
 		this.xhr.open(method.toUpperCase(), url, this.options.async);
-
+		
 		this.xhr.onreadystatechange = this.onStateChange.bind(this);
 
 		Object.each(this.headers, function(value, key){
 			try {
 				this.xhr.setRequestHeader(key, value);
 			} catch (e){
-				this.fireEvent('exception', [key, value]);
+				this.triggerEvent('exception', [key, value]);
 			}
 		}, this);
 
-		this.fireEvent('request');
+		this.triggerEvent('request');
 		this.xhr.send(data);
 		if (!this.options.async) this.onStateChange();
+		if (this.options.timeout) this.timer = this.timeout.delay(this.options.timeout, this);
 		return this;
 	},
 
@@ -4662,9 +4722,12 @@ var Request = this.Request = new Class({
 		if (!this.running) return this;
 		this.running = false;
 		this.xhr.abort();
+		clearTimeout(this.timer);
 		this.xhr.onreadystatechange = function(){};
+		this.xhr.onprogress = function(){};
+		this.xhr.onloadstart = function(){};
 		this.xhr = new Browser.Request();
-		this.fireEvent('cancel');
+		this.triggerEvent('cancel');
 		return this;
 	}
 
@@ -4740,7 +4803,10 @@ Request.HTML = new Class({
 		update: false,
 		append: false,
 		evalScripts: true,
-		filter: false
+		filter: false,
+		headers: {
+			Accept: 'text/html, application/xml, text/xml, */*'
+		}
 	},
 
 	success: function(text){
@@ -4927,7 +4993,8 @@ var Cookie = new Class({
 		domain: false,
 		duration: false,
 		secure: false,
-		document: document
+		document: document,
+		encode: true
 	},
 
 	initialize: function(key, options){
@@ -4936,7 +5003,7 @@ var Cookie = new Class({
 	},
 
 	write: function(value){
-		value = encodeURIComponent(value);
+		if (this.options.encode) value = encodeURIComponent(value);
 		if (this.options.domain) value += '; domain=' + this.options.domain;
 		if (this.options.path) value += '; path=' + this.options.path;
 		if (this.options.duration){
@@ -5003,8 +5070,8 @@ var domready = function(){
 	Browser.loaded = ready = true;
 	document.removeListener('DOMContentLoaded', domready).removeListener('readystatechange', check);
 	
-	document.fireEvent('domready');
-	window.fireEvent('domready');
+	document.triggerEvent('domready');
+	window.triggerEvent('domready');
 };
 
 var check = function(){
@@ -5300,5 +5367,5 @@ var Touch = new Class({
 	
 });
 
-Touch.build = "48f9611d30fea60ed2d913402e7033eba84c500d";
+Touch.build = "7f4f976f08e31fb0a0f69d04d11da5b617a120a7";
 
