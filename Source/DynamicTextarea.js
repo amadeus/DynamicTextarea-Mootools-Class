@@ -92,7 +92,7 @@ var DynamicTextarea = this.DynamicTextarea = new Class({
 
 		this.getLineHeight();
 
-		this.triggerEvent('init');
+		this.fireEvent('init');
 
 		// Set the height of the textarea, based on content
 		this.checkSize(true);
@@ -121,7 +121,7 @@ var DynamicTextarea = this.DynamicTextarea = new Class({
 			'blur':this.blur,
 			'scroll':this.scrollFix
 		});
-		this.triggerEvent('focus');
+		this.fireEvent('focus');
 	},
 
 	// Clean out extraneaous events, and fire blur event
@@ -132,7 +132,7 @@ var DynamicTextarea = this.DynamicTextarea = new Class({
 			'blur':this.blur,
 			'scroll':this.scrollFix
 		});
-		this.triggerEvent('blur');
+		this.fireEvent('blur');
 	},
 
 	// Delay checkSize because text hasn't been injected into the textarea yet
@@ -161,12 +161,12 @@ var DynamicTextarea = this.DynamicTextarea = new Class({
 
 		if (scrollHeight !== offsetHeight && cssHeight > this.options.minRows * this.options.lineHeight){
 			this.textarea.setStyle('height',cssHeight);
-			this.triggerEvent('resize');
+			this.fireEvent('resize');
 		}
 
 		this.options.delay = true;
 		if (manual !== true)
-			this.triggerEvent('keyPress');
+			this.fireEvent('keyPress');
 	},
 
 	// Clean out this textarea's event handlers
@@ -185,7 +185,7 @@ var DynamicTextarea = this.DynamicTextarea = new Class({
 		this.textarea.blur();
 		this.clean();
 		this.textarea.set(this.options.disabled,true);
-		this.triggerEvent('disable');
+		this.fireEvent('disable');
 	},
 
 	// Enables the textarea
@@ -195,7 +195,7 @@ var DynamicTextarea = this.DynamicTextarea = new Class({
 			'scroll':this.scrollFix
 		});
 		this.textarea.set(this.options.disabled,false);
-		this.triggerEvent('enable');
+		this.fireEvent('enable');
 	}
 });
 
