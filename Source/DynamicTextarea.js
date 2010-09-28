@@ -21,33 +21,35 @@ if (this.DynamicTextarea) return;
 
 var DynamicTextarea = this.DynamicTextarea = new Class({
 
-	Implements:[Options, Events],
+	Implements: [Options, Events],
 
 	options: {
-		value:'',
-		minRows:1,
-		delay:true,
-		lineHeight:null,
-		offset:0,
-		padding:0
+		value: '',
+		minRows: 1,
+		delay: true,
+		lineHeight: null,
+		offset: 0,
+		padding: 0
 
 		// AVAILABLE EVENTS
-		// onInit:$empty,
-		// Useful to create custom methods for determining options.lineHeight if the textarea is not displayed
+		// onInit: $empty,
+		// Tip: create custom methods for determining options.lineHeight if the textarea is not displayed on initialize
 
-		// onFocus:$empty,
-		// onBlur:$empty,
+		// onFocus: $empty,
+		// onBlur: $empty,
 
-		// onKeyPress:$empty,
-		// onResize:$empty,
+		// onKeyPress: $empty,
+		// onResize: $empty,
 
-		// onEnable:$empty,
-		// onDisable:$empty
+		// onEnable: $empty,
+		// onDisable: $empty
+		
+		// onClean: $empty,
 	},
 
-	textarea:null,
+	textarea: null,
 
-	initialize:function(textarea,options) {
+	initialize: function(textarea,options) {
 		this.textarea = document.id(textarea);
 		if (!this.textarea) return;
 
@@ -60,7 +62,6 @@ var DynamicTextarea = this.DynamicTextarea = new Class({
 			},this);
 
 		// Firefox and Opera handle scroll heights differently than all other browsers
-		
 		if (window.Browser.firefox || window.Browser.opera) {
 			this.options.offset =
 				parseInt(this.textarea.getStyle('padding-top'),10) +
@@ -78,21 +79,21 @@ var DynamicTextarea = this.DynamicTextarea = new Class({
 
 		// Disable browser resize handles, set appropriate styles
 		this.textarea.set({
-			'rows':1,
+			'rows': 1,
 			'styles': {
-				'resize':'none',
-				'-moz-resize':'none',
-				'-webkit-resize':'none',
-				'position':'relative',
-				'display':'block',
-				'overflow':'hidden',
-				'height':'auto'
+				'resize': 'none',
+				'-moz-resize': 'none',
+				'-webkit-resize': 'none',
+				'position': 'relative',
+				'display': 'block',
+				'overflow': 'hidden',
+				'height': 'auto'
 			}
 		});
 
 		this.getLineHeight();
 
-		this.fireEvent('init');
+		this.fireEvent('init',[textarea,options]);
 
 		// Set the height of the textarea, based on content
 		this.checkSize(true);
@@ -100,7 +101,7 @@ var DynamicTextarea = this.DynamicTextarea = new Class({
 	},
 
 	// This is the only crossbrowser method to determine ACTUAL lineHeight in a textarea (that I am aware of)
-	getLineHeight:function(){
+	getLineHeight: function(){
 		var backupValue = this.textarea.value;
 		this.textarea.value = 'M';
 		this.options.lineHeight = this.textarea.getScrollSize().y - this.options.padding;
@@ -116,23 +117,23 @@ var DynamicTextarea = this.DynamicTextarea = new Class({
 	// Add interactive events, and fire focus event
 	focus: function(){
 		this.textarea.addEvents({
-			'keydown':this.delayCheck,
-			'keypress':this.delayCheck,
-			'blur':this.blur,
-			'scroll':this.scrollFix
+			'keydown': this.delayCheck,
+			'keypress': this.delayCheck,
+			'blur': this.blur,
+			'scroll': this.scrollFix
 		});
-		this.fireEvent('focus');
+		return this.fireEvent('focus');
 	},
 
 	// Clean out extraneaous events, and fire blur event
 	blur: function(){
 		this.textarea.removeEvents({
-			'keydown':this.delayCheck,
-			'keypress':this.delayCheck,
-			'blur':this.blur,
-			'scroll':this.scrollFix
+			'keydown': this.delayCheck,
+			'keypress': this.delayCheck,
+			'blur': this.blur,
+			'scroll': this.scrollFix
 		});
-		this.fireEvent('blur');
+		return this.fireEvent('blur');
 	},
 
 	// Delay checkSize because text hasn't been injected into the textarea yet
@@ -166,18 +167,19 @@ var DynamicTextarea = this.DynamicTextarea = new Class({
 
 		this.options.delay = true;
 		if (manual !== true)
-			this.fireEvent('keyPress');
+			return this.fireEvent('keyPress');
 	},
 
 	// Clean out this textarea's event handlers
 	clean: function(){
 		this.textarea.removeEvents({
-			'focus':this.focus,
-			'keydown':this.delayCheck,
-			'keypress':this.delayCheck,
-			'blur':this.blur,
-			'scroll':this.scrollFix
+			'focus': this.focus,
+			'keydown': this.delayCheck,
+			'keypress': this.delayCheck,
+			'blur': this.blur,
+			'scroll': this.scrollFix
 		});
+		return this.fireEvent('clean');
 	},
 
 	// Disable the textarea
@@ -185,17 +187,17 @@ var DynamicTextarea = this.DynamicTextarea = new Class({
 		this.textarea.blur();
 		this.clean();
 		this.textarea.set(this.options.disabled,true);
-		this.fireEvent('disable');
+		return this.fireEvent('disable');
 	},
 
 	// Enables the textarea
 	enable: function(){
 		this.textarea.addEvents({
-			'focus':this.focus,
-			'scroll':this.scrollFix
+			'focus': this.focus,
+			'scroll': this.scrollFix
 		});
 		this.textarea.set(this.options.disabled,false);
-		this.fireEvent('enable');
+		return this.fireEvent('enable');
 	}
 });
 
