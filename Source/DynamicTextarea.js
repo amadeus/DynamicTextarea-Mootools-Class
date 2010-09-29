@@ -32,19 +32,20 @@ var DynamicTextarea = this.DynamicTextarea = new Class({
 		padding: 0
 
 		// AVAILABLE EVENTS
-		// onInit: $empty,
-		// Tip: create custom methods for determining options.lineHeight if the textarea is not displayed on initialize
-
-		// onFocus: $empty,
-		// onBlur: $empty,
-
-		// onKeyPress: $empty,
-		// onResize: $empty,
-
-		// onEnable: $empty,
-		// onDisable: $empty
+		// onCustomLineHeight: (function) - custom ways of determining lineHeight if necessary
 		
-		// onClean: $empty,
+		// onInit: (function)
+
+		// onFocus: (function)
+		// onBlur: (function)
+
+		// onKeyPress: (function)
+		// onResize: (function)
+
+		// onEnable: (function)
+		// onDisable: (function)
+		
+		// onClean: (function)
 	},
 
 	textarea: null,
@@ -104,12 +105,12 @@ var DynamicTextarea = this.DynamicTextarea = new Class({
 		});
 
 		this.getLineHeight();
-
-		this.fireEvent('init',[textarea,options]);
+		this.fireEvent('customLineHeight');
 
 		// Set the height of the textarea, based on content
 		this.checkSize(true);
 		this.textarea.addEvent('focus',this.focus);
+		this.fireEvent('init',[textarea,options]);
 	},
 
 	// This is the only crossbrowser method to determine ACTUAL lineHeight in a textarea (that I am aware of)
