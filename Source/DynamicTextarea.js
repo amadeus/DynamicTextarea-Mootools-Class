@@ -54,6 +54,18 @@ var DynamicTextarea = this.DynamicTextarea = new Class({
 		if (!this.textarea) return;
 
 		this.setOptions(options);
+		
+		this.parentEl = new Element('div',{
+			styles:{
+				padding:0,
+				margin:0,
+				border:0,
+				height:'auto',
+				width:'auto'
+			}
+		})
+			.inject(this.textarea,'after')
+			.adopt(this.textarea);
 
 		// Prebind common methods
 		['focus','delayCheck','blur','scrollFix','checkSize','clean','disable','enable','getLineHeight']
@@ -144,7 +156,8 @@ var DynamicTextarea = this.DynamicTextarea = new Class({
 
 	// Determine if it needs to be resized or not, and resize if necessary
 	checkSize: function(manual) {
-		var oldValue = this.options.value;
+		var oldValue = this.options.value,
+			modifiedParent = false;
 
 		this.options.value = this.textarea.value;
 		this.options.delay = false;
@@ -152,8 +165,11 @@ var DynamicTextarea = this.DynamicTextarea = new Class({
 		if (this.options.value === oldValue && manual!==true)
 			return this.options.delay = true;
 
-		if (!oldValue || this.options.value.length < oldValue.length)
+		if (!oldValue || this.options.value.length < oldValue.length) {
+			modifiedParent = true;
+			this.parentEl.setStyle('height',this.parentEl.getSize().y);
 			this.textarea.setStyle('height', this.options.minRows * this.options.lineHeight);
+		}
 
 		var tempHeight = this.textarea.getScrollSize().y,
 			offsetHeight = this.textarea.offsetHeight,
@@ -164,6 +180,8 @@ var DynamicTextarea = this.DynamicTextarea = new Class({
 			this.textarea.setStyle('height',cssHeight);
 			this.fireEvent('resize');
 		}
+		
+		if(modifiedParent) this.parentEl.setStyle('height','auto');
 
 		this.options.delay = true;
 		if (manual !== true)
