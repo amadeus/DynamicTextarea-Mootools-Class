@@ -156,17 +156,17 @@ var DynamicTextarea = this.DynamicTextarea = new Class({
 	},
 
 	// Determine if it needs to be resized or not, and resize if necessary
-	checkSize: function(manual) {
+	checkSize: function(forced) {
 		var oldValue = this.options.value,
 			modifiedParent = false;
 
 		this.options.value = this.textarea.value;
 		this.options.delay = false;
 
-		if (this.options.value === oldValue && manual!==true)
+		if (this.options.value === oldValue && force!==true)
 			return this.options.delay = true;
 
-		if (!oldValue || this.options.value.length < oldValue.length) {
+		if (!oldValue || this.options.value.length < oldValue.length || forced) {
 			modifiedParent = true;
 			this.parentEl.setStyle('height',this.parentEl.getSize().y);
 			this.textarea.setStyle('height', this.options.minRows * this.options.lineHeight);
@@ -185,7 +185,7 @@ var DynamicTextarea = this.DynamicTextarea = new Class({
 		if(modifiedParent) this.parentEl.setStyle('height','auto');
 
 		this.options.delay = true;
-		if (manual !== true)
+		if (forced !== true)
 			return this.fireEvent('keyPress');
 	},
 
