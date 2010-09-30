@@ -163,7 +163,7 @@ var DynamicTextarea = this.DynamicTextarea = new Class({
 		this.options.value = this.textarea.value;
 		this.options.delay = false;
 
-		if (this.options.value === oldValue && force!==true)
+		if (this.options.value === oldValue && forced!==true)
 			return this.options.delay = true;
 
 		if (!oldValue || this.options.value.length < oldValue.length || forced) {
