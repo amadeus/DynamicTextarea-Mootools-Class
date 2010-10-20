@@ -1,6 +1,8 @@
 DynamicTextarea
 ===========
-Purpose: Provides a lightweight plugin for the textarea tag that dynamically resizes based on its content that has no UI glitches or quirks. MooTools 1.3 only!
+Purpose: Provides a lightweight plugin for the textarea tag that dynamically resizes based on its content that has no UI glitches or quirks.
+
+MooTools 1.3 only!
 
 [Demo](http://jsfiddle.net/amadeus/Shd8G/ "Demo")
 
@@ -9,7 +11,7 @@ Purpose: Provides a lightweight plugin for the textarea tag that dynamically res
 
 How to use
 ----------
-DynamicTextarea is a reusable class that can by applied to any textarea tag on a page with any sort of CSS styling attached to it.
+DynamicTextarea is a reusable class that can by applied to any textarea tag on a page (with any sort of CSS styling attached to it) that allows it to dynamically resize based on the content it contains.
 
 Constructor:
 
