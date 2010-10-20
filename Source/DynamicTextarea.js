@@ -33,7 +33,7 @@ var DynamicTextarea = this.DynamicTextarea = new Class({
 
 		// AVAILABLE EVENTS
 		// onCustomLineHeight: (function) - custom ways of determining lineHeight if necessary
-		
+
 		// onInit: (function)
 
 		// onFocus: (function)
@@ -44,7 +44,7 @@ var DynamicTextarea = this.DynamicTextarea = new Class({
 
 		// onEnable: (function)
 		// onDisable: (function)
-		
+
 		// onClean: (function)
 	},
 
@@ -55,7 +55,7 @@ var DynamicTextarea = this.DynamicTextarea = new Class({
 		if (!this.textarea) return;
 
 		this.setOptions(options);
-		
+
 		this.parentEl = new Element('div',{
 			styles:{
 				padding:0,
@@ -181,7 +181,7 @@ var DynamicTextarea = this.DynamicTextarea = new Class({
 			this.textarea.setStyle('height',cssHeight);
 			this.fireEvent('resize');
 		}
-		
+
 		if(modifiedParent) this.parentEl.setStyle('height','auto');
 
 		this.options.delay = true;
