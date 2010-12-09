@@ -5,7 +5,7 @@ description: DynamicTextarea
 license: MIT-style
 
 authors:
-- Amadeus Demarzi (http://enmassellc.com/)
+- Amadeus Demarzi (http://amadeusamade.us)
 
 requires:
  core/1.3: [Core/Class, Core/Element, Core/Element.Event, Core/Element.Style, Core/Element.Dimensions]
